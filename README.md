@@ -145,7 +145,7 @@ Time grows linearly with rows.
 * **The loader never cleans.** If it silently turned `?` into a missing value, the tool could not report `?` as a problem.
 * **Safe versus judgment fixes.** Stripping spaces, reading numbers and dates, merging spellings, dropping exact duplicates and empty columns, and turning placeholder text into missing values are automatic. Filling missing values, clipping outliers, dropping columns and log transforms are only applied when asked for.
 * **Generated code is tested against the real thing.** Every fix is applied by `apply_fix` and also written as a pandas snippet by `fix_to_code`; the tests run both on the same table and require identical results.
-* **Warnings are errors in the tests** (`-W error`), so no pandas deprecation slips through. The suite (291 tests) passes on Python 3.10 with pandas 2.3 and on Python 3.13 with pandas 3.1.
+* **Warnings are errors in the tests** (`-W error`), so no pandas deprecation slips through. The suite (291 tests) passes on Python 3.10 with pandas 2.3 and on Python 3.13 and 3.14 with pandas 3.1.
 
 ## Limitations
 

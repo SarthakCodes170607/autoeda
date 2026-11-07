@@ -42,9 +42,15 @@ packages = ["src/autoeda"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-# "-W error" turns every warning into a failure, so pandas deprecation warnings
-# are caught the day they appear instead of silently piling up.
-addopts = "-ra -W error"
+# Warnings are turned into failures (the "error" filter), so pandas deprecation warnings are
+# caught the day they appear instead of silently piling up. Two things from LangGraph's
+# dependency LangSmith are exempt: its own pytest plugin is switched off, and one
+# Python 3.14 deprecation warning raised inside its code is ignored.
+addopts = "-ra -p no:langsmith_plugin"
+filterwarnings = [
+    "error",
+    "ignore:'asyncio.iscoroutinefunction' is deprecated:DeprecationWarning",
+]
 
 [tool.ruff]
 line-length = 100
