@@ -116,16 +116,35 @@ How to read this: the injected problems are the ones the detectors were designed
 
 ### Agent (`benchmark/agent_bench.py`)
 
-Sales tables are generated, correct answers are computed with plain pandas on the clean version, and the table is then made messy (currency text, mixed case, padded text, dd/mm/yyyy dates, 5% duplicate rows, `-999` ages). 14 questions × 5 tables = 70 per row.
+Sales tables are generated, correct answers are computed with plain pandas on the clean version, and the table is then made messy (currency text, mixed case, padded text, dd/mm/yyyy dates, 5% duplicate rows, `-999` ages). Each question is asked twice: once on the raw messy table, once after the agent has profiled and cleaned it.
 
-| | Correct | Wrong | No answer |
+**With a real model** (`qwen2.5:7b-instruct` through Ollama, one run on a laptop with an RTX 5070, 3 tables × 14 questions = 42 per row):
+
+| | Correct | Wrong answer | No answer | Needed a second plan attempt | Seconds / question |
+|---|---:|---:|---:|---:|---:|
+| Query the raw messy table | 7% (3/42) | 36% | 57% | 79% | 4.3 |
+| Profile and clean first, then query | **40%** (17/42) | 36% | 24% | 50% | 3.8 |
+
+Cleaning first raised the share of correct answers from 7% to 40% and cut the no-answer cases from 57% to 24%. The full per-question table is in [`benchmark/results/agent_results_ollama.md`](benchmark/results/agent_results_ollama.md).
+
+How to read it:
+
+* **Small sample, one model.** 42 questions per row, a single run, one 7B model. Treat it as a rough measurement, not a ranking.
+* **The wrong-answer rate did not improve (36% in both rows).** Cleaning turned many "no answer" cases into correct ones, but when the model builds the wrong query, the query still runs and returns a number. The number guard checks that the written answer matches the result table; it cannot tell that the query itself answered a different question.
+* **Where the model succeeds and fails.** After cleaning, totals, counts and filtered sums were mostly right (`total_sales`, `order_count`, `h1_2024_sales`, `median_price` 3 of 3; `sales_by_region`, `north_sales` 2 of 3). Seven questions scored 0 of 3: the top-k and per-category average questions (`top_categories_avg`, `top_products`, `avg_by_category`, `quantity_by_category`), `monthly_trend`, `average_age` and `returned_orders`. The benchmark does not say why each one failed.
+* **Raw `median_price` was correct 3 of 3**, the only question the model got right on the messy table.
+
+For comparison, a scripted planner that always asks the right question scores 14% on the raw table and 100% on the cleaned one (14 questions × 5 tables = 70 per row). That run isolates what the cleaning step is worth; it is not a measurement of any language model.
+
+| Scripted planner | Correct | Wrong | No answer |
 |---|---:|---:|---:|
 | Query the raw messy table | 14% | 29% | 57% |
 | Profile and clean first, then query | **100%** | 0% | 0% |
 
-This run uses a scripted planner that always asks the right question, which isolates what the cleaning step is worth. It is not a measurement of any language model. To measure a real model on your machine:
+To reproduce the model run on your machine:
 
 ```bash
+ollama pull qwen2.5:7b-instruct
 python benchmark/agent_bench.py --planner ollama --model qwen2.5:7b-instruct --seeds 3
 ```
 
@@ -151,7 +170,7 @@ Time grows linearly with rows.
 
 ## Limitations
 
-* Language-model quality is not measured here; the agent benchmark needs a local Ollama run.
+* Language-model quality is measured for one 7B model on one run (40% correct after cleaning, see Results). Grouped and top-k questions are where it fails most; a larger model or more prompt work would likely help, but that is not measured here.
 * Checks work on a single table in memory; there is no streaming or database support.
 * European decimals (`1,5`) and files that mix several date formats in one column are only partly understood.
 * "Unusual rows" assumes the data forms one cloud; clustered or heavy-tailed data may produce none or too few results.
