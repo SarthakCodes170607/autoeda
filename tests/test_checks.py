@@ -473,3 +473,31 @@ def test_rows_that_break_the_pattern_are_found_even_when_each_value_is_normal():
 
 def test_too_few_rows_skip_the_multivariate_check():
     assert issues_of(correlated_frame(n=50), IssueKind.MULTIVARIATE_OUTLIERS) == []
+
+
+def test_sentinel_below_a_skewed_columns_whole_range_is_found():
+    # Income-like data: the lower Tukey fence is negative, so -999 sits inside the fence,
+    # but it is still far below every real value.
+    income = np.random.default_rng(3).lognormal(10.5, 0.6, 400)
+    income[:12] = -999.0
+
+    issue = issue_for(pd.DataFrame({"income": income}), IssueKind.SENTINEL_VALUES, "income")
+
+    assert issue.details["values"] == [-999.0]
+
+
+def test_a_few_mild_outliers_alone_are_not_reported():
+    rng = np.random.default_rng(5)
+    values = np.concatenate([rng.uniform(40, 60, 500), [78.0] * 3])  # 3 mild values, 0.6%
+
+    assert issues_of(pd.DataFrame({"x": values}), IssueKind.OUTLIERS) == []
+
+
+def test_unusual_rows_are_not_reported_when_too_many_rows_look_unusual():
+    rng = np.random.default_rng(2)
+    covariance = np.full((3, 3), 0.8)
+    np.fill_diagonal(covariance, 1.0)
+    data = rng.multivariate_normal(np.zeros(3), covariance, 1000)
+    data[:40] = [2.6, -2.6, -2.6]  # 4% of rows break the pattern, above the 2% limit
+
+    assert issues_of(pd.DataFrame(data, columns=list("abc")), IssueKind.MULTIVARIATE_OUTLIERS) == []
