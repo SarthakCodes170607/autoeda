@@ -1,0 +1,94 @@
+{% extends "base.html.j2" %}
+{% block body %}
+<h1>{{ title }}</h1>
+<p class="sub">
+  {{ report.source or "DataFrame" }} · {{ "{:,}".format(report.n_rows) }} rows ·
+  {{ report.n_cols }} columns
+  {% for note in report.notes %} · {{ note }}{% endfor %}
+</p>
+
+<div class="grid">
+  <div class="card stat">
+    <div class="num">{{ "%.0f"|format(report.quality_score) }}<span class="label"> / 100</span></div>
+    <div class="label">quality score ({{ score_label }})</div>
+  </div>
+  {% for level in severities %}
+  <div class="card stat">
+    <div class="num">{{ counts[level.value] }}</div>
+    <div class="label">{{ level.value }} severity</div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if cleaned %}
+<h2>After cleaning</h2>
+<div class="card">
+  <p>Quality score {{ "%.0f"|format(cleaned.before.quality_score) }} →
+     <strong>{{ "%.0f"|format(cleaned.after.quality_score) }}</strong> ({{ after_label }}).
+     Issues {{ cleaned.before.issues|length }} → {{ cleaned.after.issues|length }}.
+     {{ cleaned.applied|length }} fixes applied, {{ cleaned.skipped|length }} skipped.</p>
+  <table>
+    <tr><th>Issue</th><th>What was done</th><th>Effect</th></tr>
+    {% for item in cleaned.applied %}
+    <tr><td>{{ item.issue_id }}</td><td>{{ item.fix.description }}</td><td>{{ item.effect }}</td></tr>
+    {% endfor %}
+    {% for item in cleaned.skipped %}
+    <tr><td>{{ item.issue_id }}</td><td>skipped</td><td>{{ item.reason }}</td></tr>
+    {% endfor %}
+  </table>
+  <details><summary>Show as pandas code</summary><pre>{{ cleaned.code }}</pre></details>
+</div>
+{% endif %}
+
+<h2>Issues ({{ report.issues|length }})</h2>
+{% if not report.issues %}
+<div class="card">No issues found.</div>
+{% endif %}
+{% for item in report.issues %}
+<div class="card issue">
+  <h3><span class="chip {{ item.severity.value }}">{{ item.severity.value }}</span>
+      {{ item.title }}{% if item.column %} · {{ item.column }}{% endif %}</h3>
+  <div class="id">{{ item.id }}</div>
+  <p style="margin:8px 0 0">{{ item.message }}</p>
+  {% if item.fix %}
+  <details>
+    <summary>Suggested fix: {{ item.fix.description }}
+      {% if item.fix.safe_auto %}<span class="safe">· safe to apply automatically</span>{% endif %}
+    </summary>
+    <pre>{{ issue_code[item.id] }}</pre>
+  </details>
+  {% endif %}
+</div>
+{% endfor %}
+
+{% if missing_chart %}
+<h2>Missing values</h2>
+<div class="card">{{ missing_chart | safe }}</div>
+{% endif %}
+
+{% if correlation_chart %}
+<h2>Correlation between numeric columns</h2>
+<div class="card">{{ correlation_chart | safe }}</div>
+{% endif %}
+
+<h2>Columns</h2>
+{% for col in report.columns %}
+<div class="card">
+  <strong>{{ col.name }}</strong>
+  <span class="tag"> · {{ col.kind.value }}{% if col.stored_as_text and col.kind.value != "text" %} (stored as text){% endif %}
+    · {{ col.n_unique }} distinct · {{ "%.1f"|format(col.missing_fraction * 100) }}% missing</span>
+  <div class="tag">{{ col.reason }}</div>
+  {% if col.stats %}
+  <table style="margin-top:8px">
+    <tr>{% for key in col.stats %}<th>{{ key }}</th>{% endfor %}</tr>
+    <tr>{% for key, value in col.stats.items() %}
+      <td class="num-cell">{% if value is number %}{{ "%.4g"|format(value) }}{% else %}{{ value }}{% endif %}</td>
+    {% endfor %}</tr>
+  </table>
+  {% endif %}
+  {% if column_charts[col.name] %}
+  <details><summary>Show chart</summary>{{ column_charts[col.name] | safe }}</details>
+  {% endif %}
+</div>
+{% endfor %}
+{% endblock %}

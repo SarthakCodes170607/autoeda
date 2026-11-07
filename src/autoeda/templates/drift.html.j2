@@ -1,0 +1,39 @@
+{% extends "base.html.j2" %}
+{% block body %}
+<h1>{{ title }}</h1>
+<p class="sub">Reference: {{ "{:,}".format(drift.reference_rows) }} rows ·
+   Current: {{ "{:,}".format(drift.current_rows) }} rows</p>
+
+{% if drift.removed_columns or drift.added_columns or drift.type_changes %}
+<h2>Schema changes</h2>
+<div class="card">
+  {% if drift.removed_columns %}<p><span class="chip high">high</span> Missing from the current data:
+     {{ drift.removed_columns | join(", ") }}</p>{% endif %}
+  {% if drift.added_columns %}<p><span class="chip high">high</span> New in the current data:
+     {{ drift.added_columns | join(", ") }}</p>{% endif %}
+  {% for name, before, after in drift.type_changes %}
+  <p><span class="chip high">high</span> Type of <strong>{{ name }}</strong> changed from {{ before }} to {{ after }}.</p>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if chart %}
+<h2>Shift per column</h2>
+<div class="card">{{ chart | safe }}</div>
+{% endif %}
+
+<h2>Columns</h2>
+<div class="card">
+<table>
+  <tr><th>Column</th><th>Severity</th><th>What changed</th></tr>
+  {% for item in drift.columns %}
+  <tr>
+    <td>{{ item.column }}</td>
+    <td><span class="chip {{ item.severity.value }}">{{ item.severity.value }}</span></td>
+    <td>{{ item.message }}</td>
+  </tr>
+  {% endfor %}
+</table>
+<p class="tag">PSI below 0.10 is stable, 0.10 to 0.25 is a moderate shift, above 0.25 is a large shift.</p>
+</div>
+{% endblock %}
