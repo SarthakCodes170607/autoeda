@@ -272,3 +272,37 @@ def test_plain_answer_for_a_single_number_and_for_a_table(small_result):
 
     assert "is 3.50" in plain_answer("q", single)
     assert "| city" in plain_answer("q", small_result)
+
+
+def test_planner_examples_are_valid_queries():
+    # The worked examples in the planner prompt must stay valid as the query language changes.
+    from autoeda.agent import prompts
+    from autoeda.agent.queries import QuerySpec
+
+    assert prompts.PLANNER_EXAMPLES
+    for question, query in prompts.PLANNER_EXAMPLES:
+        assert question
+        QuerySpec.model_validate(query)
+        assert question in prompts.PLANNER_SYSTEM
+
+
+def test_planner_prompt_still_starts_with_the_role_line():
+    # The scripted benchmark planner and the tests recognise the planning step by this prefix.
+    from autoeda.agent import prompts
+
+    assert prompts.PLANNER_SYSTEM.startswith("You plan")
+
+
+def test_validation_errors_tell_the_model_how_to_repair_the_query():
+    import pandas as pd
+
+    from autoeda.agent.queries import QueryError, QuerySpec, run_query
+
+    frame = pd.DataFrame({"category": ["a", "b"], "amount": [1.0, 2.0]})
+    with pytest.raises(QueryError, match="group_by"):
+        run_query(
+            frame,
+            QuerySpec(operation="aggregate", column="category", agg="mean", group_by=["category"]),
+        )
+    with pytest.raises(QueryError, match="not the column you group by"):
+        run_query(frame, QuerySpec(operation="trend", date_column="amount"))

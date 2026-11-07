@@ -81,7 +81,10 @@ def _cell(value: Any) -> str:
 
 def _require_column(df: pd.DataFrame, name: str | None, role: str) -> str:
     if not name:
-        raise QueryError(f"{role} is required")
+        raise QueryError(
+            f"{role} is required. Name the column to aggregate (the number being summed, "
+            "averaged or counted), not the column you group by."
+        )
     if name not in df.columns:
         close = [c for c in df.columns if c.lower() == name.lower()]
         hint = f" Did you mean '{close[0]}'?" if close else ""
@@ -91,7 +94,12 @@ def _require_column(df: pd.DataFrame, name: str | None, role: str) -> str:
 
 def _require_numeric(df: pd.DataFrame, name: str) -> None:
     if not pd.api.types.is_numeric_dtype(df[name]) or pd.api.types.is_bool_dtype(df[name]):
-        raise QueryError(f"Column '{name}' is not numeric, so it cannot be summed or averaged")
+        raise QueryError(
+            f"Column '{name}' is not numeric, so it cannot be summed or averaged. "
+            "If it is a category to split by, put it in group_by and set column to the "
+            "numeric column to aggregate. If its numbers are stored as text, choose the "
+            "numeric_as_text fix."
+        )
 
 
 def _apply_filter(df: pd.DataFrame, item: Filter) -> pd.Series:
