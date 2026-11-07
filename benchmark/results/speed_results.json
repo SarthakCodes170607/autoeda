@@ -1,0 +1,30 @@
+{
+  "machine": "x86_64, Python 3.13.18",
+  "peak_memory_mb": 934,
+  "rows": [
+    {
+      "rows": 10100,
+      "profile_seconds": 0.5,
+      "clean_seconds": 0.2,
+      "issues": 10
+    },
+    {
+      "rows": 101000,
+      "profile_seconds": 2.3,
+      "clean_seconds": 1.6,
+      "issues": 10
+    },
+    {
+      "rows": 505000,
+      "profile_seconds": 10.9,
+      "clean_seconds": 8.4,
+      "issues": 12
+    },
+    {
+      "rows": 1010000,
+      "profile_seconds": 23.8,
+      "clean_seconds": 17.8,
+      "issues": 11
+    }
+  ]
+}

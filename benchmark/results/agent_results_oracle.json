@@ -1,0 +1,58 @@
+{
+  "planner": "oracle",
+  "model": null,
+  "seeds": 5,
+  "questions_per_variant": 70,
+  "variants": {
+    "raw": {
+      "correct": 10,
+      "wrong": 20,
+      "error": 40,
+      "plain": 40,
+      "retries": 40,
+      "seconds": 29.903483887000675
+    },
+    "autoeda": {
+      "correct": 70,
+      "wrong": 0,
+      "error": 0,
+      "plain": 0,
+      "retries": 0,
+      "seconds": 18.395853327000168
+    }
+  },
+  "per_question": {
+    "raw": {
+      "total_sales": 0,
+      "sales_by_region": 0,
+      "top_categories_avg": 0,
+      "order_count": 0,
+      "unique_customers": 5,
+      "h1_2024_sales": 0,
+      "monthly_trend": 0,
+      "north_sales": 0,
+      "average_age": 0,
+      "top_products": 0,
+      "median_price": 5,
+      "returned_orders": 0,
+      "avg_by_category": 0,
+      "quantity_by_category": 0
+    },
+    "autoeda": {
+      "total_sales": 5,
+      "sales_by_region": 5,
+      "top_categories_avg": 5,
+      "order_count": 5,
+      "unique_customers": 5,
+      "h1_2024_sales": 5,
+      "monthly_trend": 5,
+      "north_sales": 5,
+      "average_age": 5,
+      "top_products": 5,
+      "median_price": 5,
+      "returned_orders": 5,
+      "avg_by_category": 5,
+      "quantity_by_category": 5
+    }
+  }
+}
