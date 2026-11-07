@@ -83,6 +83,12 @@ def profile_tab(df: pd.DataFrame, name: str, truncated: bool) -> None:
     columns[4].metric("Medium", counts["medium"])
     if truncated:
         st.info(f"Only the first {MAX_ROWS:,} rows were analysed.")
+    cleaned = st.session_state.get("cleaned")
+    if cleaned is not None:
+        st.info(
+            f"This tab shows the original file. After cleaning, the score is "
+            f"{cleaned.after.quality_score:.0f} / 100 (see the Clean tab)."
+        )
 
     st.subheader(f"Issues ({len(report.issues)})")
     if not report.issues:

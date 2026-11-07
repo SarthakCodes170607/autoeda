@@ -75,3 +75,10 @@ def test_asking_without_the_agent_extras_explains_what_is_missing(without_agent_
 
     assert not test.exception
     assert any("agent extras" in error.value for error in test.error)
+
+
+def test_profile_tab_points_to_the_cleaned_score_after_cleaning(app):
+    next(b for b in app.button if b.label == "Clean the data").click()
+    app.run()
+
+    assert any("After cleaning, the score is" in info.value for info in app.info)
