@@ -107,7 +107,7 @@ Known problems are injected into six clean tables (iris, wine, diabetes, breast 
 
 | Problem | Recall (easy / hard) | Precision |
 |---|---|---|
-| placeholder text (`?`, `N/A`, `unknown`) | 100% / 100% | 100% |
+| placeholder text (`?`, `unknown`, `-`; `N/A` too when the table is passed as a DataFrame) | 100% / 100% | 100% |
 | numbers stored as text (`$1,234.50`), duplicate rows, dates as text, missing values, whitespace, mixed case, constant / empty column, near-duplicate columns, sentinel codes (`-999`) | 100% / 100% | 100% |
 | outliers | 100% / **59%** (0.5% of rows at only 5-6 standard deviations) | 100% |
 | unusual rows (multivariate) | 0%–100% depending on the table (row-level) | 0 rows flagged on 3 of 6 clean tables, at most 3 on the others |

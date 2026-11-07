@@ -20,6 +20,7 @@ Why things are the way they are, including what went wrong along the way.
 |---|---|
 | `csv.Sniffer` for the delimiter | Standard library. Limited to `, ; tab \|`. |
 | Try `utf-8-sig`, then `latin-1` | `utf-8-sig` strips Excel's byte-order mark; `latin-1` decodes every byte, so it never fails. |
+| pandas' own missing-value tokens are kept (empty cell, `N/A`, `NA`, `null`, `NaN`) | They become real missing values when a CSV is read, so they are reported as ordinary missing values. Only markers pandas does not convert (`?`, `unknown`, `-`, `none`...) are reported as placeholder text. Passing a DataFrame that already holds the text `N/A` reports it as placeholder text. |
 | `low_memory=False` | Otherwise pandas guesses types chunk by chunk and can disagree with itself. |
 | Read one extra row when `max_rows` is set | Cheapest way to know the file was cut short. |
 | Text tested for numbers with `pd.to_numeric` | Reuses pandas instead of a hand-written parser. |
