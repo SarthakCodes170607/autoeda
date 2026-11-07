@@ -4,6 +4,8 @@
 
 **Find the data-quality problems in a CSV file, rank them by severity, fix them with code you can read, and ask questions in plain English.**
 
+**Live demo:** https://autoeda-sarthak170607.streamlit.app
+
 autoeda profiles a table, reports 18 kinds of problems (placeholder text standing in for blanks, prices stored as text, impossible values, duplicate rows, dates in the wrong format and more), suggests a pandas fix for each, applies the safe ones, and shows the quality score before and after. On top of that sits an AI data analyst: a LangGraph pipeline in which a local model (Ollama) picks the fixes and the query, ordinary code runs them, and every number in the written answer is checked against the data.
 
 <p>
@@ -61,7 +63,7 @@ autoeda ask examples/sample_messy.csv "What are the total sales for each city?" 
 
 ### Deploy the web demo
 
-The demo is a single Streamlit app (`streamlit_app.py`, `requirements.txt` included). Push the repo to GitHub, open <https://share.streamlit.io>, choose the repo and `streamlit_app.py`. Uploads are capped at 50,000 rows to fit the free tier. The "ask in English" box needs an Ollama server, so on the hosted demo use the no-model query builder below it.
+The live demo above is hosted on Streamlit Community Cloud. It is a single Streamlit app (`streamlit_app.py`, `requirements.txt` included). Push the repo to GitHub, open <https://share.streamlit.io>, choose the repo and `streamlit_app.py`. Uploads are capped at 50,000 rows to fit the free tier. The "ask in English" box needs an Ollama server, so on the hosted demo use the no-model query builder below it.
 
 ## How it works
 
