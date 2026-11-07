@@ -160,5 +160,40 @@ def drift_command(
         raise typer.Exit(1)
 
 
+@app.command("ask")
+def ask_command(
+    file: Annotated[Path, typer.Argument(help="CSV file to ask about.")],
+    question: Annotated[str, typer.Argument(help="Your question, in plain English.")],
+    model: Annotated[str, typer.Option(help="Ollama model name.")] = "qwen2.5:7b-instruct",
+    host: Annotated[str | None, typer.Option(help="Ollama server address.")] = None,
+    no_clean: Annotated[
+        bool, typer.Option("--no-clean", help="Query the raw table without cleaning it first.")
+    ] = False,
+    show_steps: Annotated[bool, typer.Option("--steps", help="Print what each step did.")] = False,
+) -> None:
+    """Ask a question about a CSV file. Needs a local Ollama server and the agent extras."""
+    try:
+        from autoeda.agent import OllamaClient, ask
+        from autoeda.agent.llm import LLMError
+    except ImportError:
+        typer.echo('Install the agent extras first: pip install "autoeda[agent]"', err=True)
+        raise typer.Exit(2) from None
+
+    try:
+        llm = OllamaClient(model=model, host=host)
+    except LLMError as error:
+        typer.echo(f"Error: {error}", err=True)
+        raise typer.Exit(2) from None
+
+    outcome = ask(_exists(file), question, llm, clean_data=not no_clean)
+    if show_steps:
+        for step in outcome.trace:
+            typer.echo(f"  [{step['step']}] {step['detail']}")
+        typer.echo("")
+    typer.echo(outcome.answer)
+    if outcome.result is None:
+        raise typer.Exit(1)
+
+
 if __name__ == "__main__":  # pragma: no cover
     app()

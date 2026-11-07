@@ -4,8 +4,8 @@
 
 | Problem | Level | Trials | Recall | Precision | False alarms |
 |---|---|---:|---:|---:|---:|
-| case_variants | easy | 120 | 92% | 100% | 0 |
-| case_variants | hard | 120 | 92% | 100% | 0 |
+| case_variants | easy | 120 | 100% | 100% | 0 |
+| case_variants | hard | 120 | 100% | 100% | 0 |
 | constant_column | easy | 120 | 100% | 100% | 0 |
 | constant_column | hard | 120 | 100% | 100% | 0 |
 | correlated | easy | 87 | 100% | 100% | 0 |
@@ -24,8 +24,8 @@
 | numeric_as_text | hard | 120 | 100% | 100% | 0 |
 | outliers | easy | 92 | 100% | 100% | 0 |
 | outliers | hard | 92 | 59% | 100% | 0 |
-| sentinels | easy | 120 | 98% | 100% | 0 |
-| sentinels | hard | 120 | 98% | 100% | 0 |
+| sentinels | easy | 120 | 100% | 100% | 0 |
+| sentinels | hard | 120 | 100% | 100% | 0 |
 | whitespace | easy | 120 | 100% | 100% | 0 |
 | whitespace | hard | 120 | 100% | 100% | 0 |
 

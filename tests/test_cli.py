@@ -120,3 +120,14 @@ def test_no_arguments_shows_help():
 @pytest.mark.parametrize("command", ["profile", "clean", "drift"])
 def test_every_command_has_help(command):
     assert runner.invoke(app, [command, "--help"]).exit_code == 0
+
+
+def test_ask_reports_an_unreachable_model_without_a_traceback():
+    # No Ollama server is running in the tests, so the call fails and says so.
+    result = runner.invoke(
+        app, ["ask", str(SAMPLE), "How many orders?", "--host", "http://127.0.0.1:1"]
+    )
+
+    assert result.exit_code == 1
+    assert "could not answer" in result.output.lower()
+    assert "Traceback" not in result.output
