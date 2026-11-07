@@ -266,6 +266,26 @@ def is_correct(result: QueryResult | None, truth: dict[tuple, float], tolerance:
     return all(abs(got[k] - truth[k]) <= tolerance * max(abs(truth[k]), 1.0) for k in truth)
 
 
+def describe_failure(variant: str, seed: int, question, truth: dict, outcome) -> dict:
+    """Everything needed to see why a question was not answered correctly."""
+    got = None
+    if outcome.result is not None:
+        got = {" / ".join(k): v for k, v in result_to_dict(outcome.result).items()}
+    return {
+        "variant": variant,
+        "seed": seed,
+        "question": question.id,
+        "text": question.text,
+        "expected_query": question.plan["query"],
+        "model_query": outcome.plan.query.model_dump() if outcome.plan else None,
+        "model_fix_ids": outcome.plan.fix_ids if outcome.plan else None,
+        "error": outcome.error,
+        "expected_result": {" / ".join(k): v for k, v in truth.items()},
+        "got_result": got,
+        "trace": outcome.trace,
+    }
+
+
 # ---------------------------------------------------------------- planners
 
 
@@ -286,7 +306,9 @@ def oracle_llm() -> FakeLLM:
 # ---------------------------------------------------------------- run
 
 
-def run(planner: str, model: str, seeds: int, variants: list[str]) -> dict:
+def run(
+    planner: str, model: str, seeds: int, variants: list[str], failures: list | None = None
+) -> dict:
     stats = {
         name: {"correct": 0, "wrong": 0, "error": 0, "plain": 0, "retries": 0, "seconds": 0.0}
         for name in variants
@@ -314,6 +336,11 @@ def run(planner: str, model: str, seeds: int, variants: list[str]) -> dict:
                     per_question[name][question.id] += 1
                 else:
                     cell["wrong"] += 1
+                if failures is not None and not (
+                    outcome.result is not None
+                    and is_correct(outcome.result, truth, question.tolerance)
+                ):
+                    failures.append(describe_failure(name, seed, question, truth, outcome))
                 cell["plain"] += int(outcome.plain_answer_used)
                 cell["retries"] += int(sum(s["step"] == "plan" for s in outcome.trace) > 1)
 
@@ -369,12 +396,16 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=Path(__file__).parent / "results")
     args = parser.parse_args()
 
-    results = run(args.planner, args.model, args.seeds, ["raw", "autoeda"])
+    failures: list = []
+    results = run(args.planner, args.model, args.seeds, ["raw", "autoeda"], failures)
     args.out.mkdir(parents=True, exist_ok=True)
     stem = f"agent_results_{args.planner}"
     (args.out / f"{stem}.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
     markdown = to_markdown(results)
     (args.out / f"{stem}.md").write_text(markdown, encoding="utf-8")
+    (args.out / f"{stem}_failures.json").write_text(
+        json.dumps(failures, indent=2, default=str), encoding="utf-8"
+    )
     print(markdown)
 
 
