@@ -166,7 +166,11 @@ def inject_sentinels(df, rng, level):
     df = df.copy()
     name = _pick(rng, _numeric_columns(df))
     share = rng.uniform(0.05, 0.10) if level == "easy" else rng.uniform(0.01, 0.02)
-    sentinel = float(rng.choice([-999, -9999, 9999, 99999]))
+    # A sentinel inside the column's real range (9999 in an income column that already
+    # contains 9999) cannot be told apart from data, so only out-of-range codes are used.
+    low, high = df[name].min(), df[name].max()
+    options = [c for c in (-999, -9999, 9999, 99999) if c < low or c > high]
+    sentinel = float(rng.choice(options))
     df.loc[_rows(rng, len(df), share), name] = sentinel
     return Injection(IssueKind.SENTINEL_VALUES, df, [name])
 
@@ -205,7 +209,9 @@ def inject_whitespace(df, rng, level):
 
 def inject_case_variants(df, rng, level):
     df = df.copy()
-    name = _pick(rng, _text_columns(df))
+    # Only columns where upper-casing changes something (not single letters like "A").
+    changeable = [c for c in _text_columns(df) if df[c].astype(str).str.upper().ne(df[c]).any()]
+    name = _pick(rng, changeable)
     share = rng.uniform(0.15, 0.30) if level == "easy" else rng.uniform(0.02, 0.04)
     rows = _rows(rng, len(df), share)
     df.loc[rows, name] = df.loc[rows, name].map(lambda value: str(value).upper())

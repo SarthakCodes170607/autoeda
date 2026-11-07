@@ -1,0 +1,331 @@
+{
+  "detectors": {
+    "rows": [
+      {
+        "kind": "missing",
+        "level": "easy",
+        "trials": 120,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "missing",
+        "level": "hard",
+        "trials": 120,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "disguised_missing",
+        "level": "easy",
+        "trials": 120,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "disguised_missing",
+        "level": "hard",
+        "trials": 120,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "duplicates",
+        "level": "easy",
+        "trials": 120,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "duplicates",
+        "level": "hard",
+        "trials": 120,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "outliers",
+        "level": "easy",
+        "trials": 92,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "outliers",
+        "level": "hard",
+        "trials": 92,
+        "recall": 0.5869565217391305,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "sentinels",
+        "level": "easy",
+        "trials": 120,
+        "recall": 0.9833333333333333,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "sentinels",
+        "level": "hard",
+        "trials": 120,
+        "recall": 0.9833333333333333,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "numeric_as_text",
+        "level": "easy",
+        "trials": 120,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "numeric_as_text",
+        "level": "hard",
+        "trials": 120,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "date_as_text",
+        "level": "easy",
+        "trials": 120,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "date_as_text",
+        "level": "hard",
+        "trials": 120,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "whitespace",
+        "level": "easy",
+        "trials": 120,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "whitespace",
+        "level": "hard",
+        "trials": 120,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "case_variants",
+        "level": "easy",
+        "trials": 120,
+        "recall": 0.925,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "case_variants",
+        "level": "hard",
+        "trials": 120,
+        "recall": 0.925,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "constant_column",
+        "level": "easy",
+        "trials": 120,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "constant_column",
+        "level": "hard",
+        "trials": 120,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "empty_column",
+        "level": "easy",
+        "trials": 120,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "empty_column",
+        "level": "hard",
+        "trials": 120,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "correlated",
+        "level": "easy",
+        "trials": 87,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      },
+      {
+        "kind": "correlated",
+        "level": "hard",
+        "trials": 87,
+        "recall": 1.0,
+        "precision": 1.0,
+        "false_alarms": 0
+      }
+    ],
+    "skipped_trials": 122,
+    "baselines": {
+      "iris": {
+        "rows": 150,
+        "issues_above_info": [
+          "correlated:petal length (cm)|petal width (cm)"
+        ]
+      },
+      "wine": {
+        "rows": 178,
+        "issues_above_info": [
+          "multivariate_outliers:rows"
+        ]
+      },
+      "diabetes": {
+        "rows": 442,
+        "issues_above_info": [
+          "multivariate_outliers:rows"
+        ]
+      },
+      "breast_cancer": {
+        "rows": 569,
+        "issues_above_info": [
+          "outliers:area error",
+          "outliers:perimeter error",
+          "outliers:radius error",
+          "outliers:worst area",
+          "outliers:smoothness error",
+          "outliers:compactness error",
+          "outliers:fractal dimension error",
+          "outliers:symmetry error",
+          "outliers:mean area",
+          "outliers:worst fractal dimension",
+          "outliers:worst symmetry",
+          "outliers:concavity error",
+          "outliers:texture error",
+          "outliers:concave points error",
+          "outliers:mean compactness",
+          "outliers:worst compactness",
+          "outliers:mean fractal dimension",
+          "outliers:mean symmetry",
+          "outliers:worst perimeter",
+          "outliers:mean radius",
+          "outliers:worst concavity",
+          "outliers:mean texture",
+          "outliers:mean smoothness",
+          "correlated:mean area|worst area",
+          "correlated:mean area|worst perimeter",
+          "correlated:mean area|worst radius",
+          "correlated:mean perimeter|mean area",
+          "correlated:mean perimeter|worst perimeter",
+          "correlated:mean perimeter|worst radius",
+          "correlated:mean radius|mean area",
+          "correlated:mean radius|mean perimeter",
+          "correlated:mean radius|worst perimeter",
+          "correlated:mean radius|worst radius",
+          "correlated:radius error|area error",
+          "correlated:radius error|perimeter error",
+          "correlated:worst perimeter|worst area",
+          "correlated:worst radius|worst area",
+          "correlated:worst radius|worst perimeter",
+          "outliers:mean concavity",
+          "correlated:mean concavity|mean concave points",
+          "correlated:mean perimeter|worst area",
+          "correlated:mean radius|worst area",
+          "correlated:mean texture|worst texture",
+          "correlated:perimeter error|area error"
+        ]
+      },
+      "customers": {
+        "rows": 2000,
+        "issues_above_info": [
+          "outliers:income",
+          "outliers:spend",
+          "multivariate_outliers:rows",
+          "correlated:income|spend"
+        ]
+      },
+      "sensors": {
+        "rows": 5000,
+        "issues_above_info": []
+      }
+    }
+  },
+  "multivariate": [
+    {
+      "dataset": "iris",
+      "rows": 150,
+      "injected_rows": 100,
+      "row_recall": 0.34,
+      "rows_flagged_on_clean_table": 0,
+      "false_flags_per_1000_rows": 0.0
+    },
+    {
+      "dataset": "wine",
+      "rows": 178,
+      "injected_rows": 100,
+      "row_recall": 0.1,
+      "rows_flagged_on_clean_table": 1,
+      "false_flags_per_1000_rows": 5.337078651685394
+    },
+    {
+      "dataset": "diabetes",
+      "rows": 442,
+      "injected_rows": 100,
+      "row_recall": 0.98,
+      "rows_flagged_on_clean_table": 3,
+      "false_flags_per_1000_rows": 2.9411764705882355
+    },
+    {
+      "dataset": "breast_cancer",
+      "rows": 569,
+      "injected_rows": 100,
+      "row_recall": 0.0,
+      "rows_flagged_on_clean_table": 0,
+      "false_flags_per_1000_rows": 0.0
+    },
+    {
+      "dataset": "customers",
+      "rows": 2000,
+      "injected_rows": 400,
+      "row_recall": 1.0,
+      "rows_flagged_on_clean_table": 3,
+      "false_flags_per_1000_rows": 0.0
+    },
+    {
+      "dataset": "sensors",
+      "rows": 5000,
+      "injected_rows": 1000,
+      "row_recall": 0.247,
+      "rows_flagged_on_clean_table": 0,
+      "false_flags_per_1000_rows": 0.0
+    }
+  ]
+}

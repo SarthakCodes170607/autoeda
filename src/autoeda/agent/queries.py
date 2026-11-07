@@ -122,7 +122,9 @@ def _apply_filter(df: pd.DataFrame, item: Filter) -> pd.Series:
         mask = series.isin([coerce(v) for v in values])
         return mask if op == "in" else ~mask
     if op == "contains":
-        return series.astype("string").str.contains(str(value), case=False, regex=False).fillna(False)
+        return (
+            series.astype("string").str.contains(str(value), case=False, regex=False).fillna(False)
+        )
 
     target = coerce(value)
     comparisons = {
@@ -133,7 +135,8 @@ def _apply_filter(df: pd.DataFrame, item: Filter) -> pd.Series:
         "<": series < target,
         "<=": series <= target,
     }
-    return comparisons[op].fillna(False)
+    # Missing values never satisfy a comparison, including "!=" (as in SQL).
+    return comparisons[op].fillna(False) & series.notna()
 
 
 # ---------------------------------------------------------------- execution
@@ -181,8 +184,10 @@ def _aggregate(frame: pd.DataFrame, spec: QuerySpec) -> tuple[str, pd.DataFrame]
         if spec.operation == "top_k":
             if spec.agg in ("count", "nunique"):
                 raise QueryError("top_k without group_by ranks rows by a numeric column")
-            table = frame.nlargest(spec.k, metric) if not spec.ascending else frame.nsmallest(
-                spec.k, metric
+            table = (
+                frame.nlargest(spec.k, metric)
+                if not spec.ascending
+                else frame.nsmallest(spec.k, metric)
             )
             table = table.reset_index(drop=True)
             return f"rows with the {'smallest' if spec.ascending else 'largest'} {metric}", table
