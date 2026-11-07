@@ -118,23 +118,24 @@ How to read this: the injected problems are the ones the detectors were designed
 
 Sales tables are generated, correct answers are computed with plain pandas on the clean version, and the table is then made messy (currency text, mixed case, padded text, dd/mm/yyyy dates, 5% duplicate rows, `-999` ages). Each question is asked twice: once on the raw messy table, once after the agent has profiled and cleaned it.
 
-**With a real model** (`qwen2.5:7b-instruct` through Ollama, one run on a laptop with an RTX 5070, 3 tables × 14 questions = 42 per row):
+**With a real model** (`qwen2.5:7b-instruct` through Ollama, a laptop with an RTX 5070, 3 tables × 14 questions = 42 per row). There are two runs: the first prompt, and the prompt after I read the first run's failures and rewrote it.
 
-| | Correct | Wrong answer | No answer | Needed a second plan attempt | Seconds / question |
-|---|---:|---:|---:|---:|---:|
-| Query the raw messy table | 7% (3/42) | 36% | 57% | 79% | 4.3 |
-| Profile and clean first, then query | **40%** (17/42) | 36% | 24% | 50% | 3.8 |
+| Planner prompt | Table queried | Correct | Wrong answer | No answer | Needed a second plan attempt | Seconds / question |
+|---|---|---:|---:|---:|---:|---:|
+| v1 | raw messy table | 7% (3/42) | 36% | 57% | 79% | 4.3 |
+| v1 | profiled and cleaned first | 40% (17/42) | 36% | 24% | 50% | 3.8 |
+| v2 | raw messy table | 17% (7/42) | 26% | 57% | 62% | 4.1 |
+| v2 | profiled and cleaned first | **83%** (35/42) | 17% | 0% | 5% | 2.9 |
 
-Cleaning first raised the share of correct answers from 7% to 40% and cut the no-answer cases from 57% to 24%. The full per-question table is in [`benchmark/results/agent_results_ollama.md`](benchmark/results/agent_results_ollama.md).
-
-These numbers are from the first version of the planner prompt (commit `17b58b6`). The prompt has since been rewritten after reading the failures; the table will be replaced with a rerun of the current prompt.
+Per-question tables: [`benchmark/results/agent_results_ollama.md`](benchmark/results/agent_results_ollama.md) (v2) and [`agent_results_ollama_v1.md`](benchmark/results/agent_results_ollama_v1.md) (v1).
 
 How to read it:
 
-* **Small sample, one model.** 42 questions per row, a single run, one 7B model. Treat it as a rough measurement, not a ranking.
-* **The wrong-answer rate did not improve (36% in both rows).** Cleaning turned many "no answer" cases into correct ones, but when the model builds the wrong query, the query still runs and returns a number. The number guard checks that the written answer matches the result table; it cannot tell that the query itself answered a different question.
-* **Where the model succeeds and fails.** After cleaning, totals, counts and filtered sums were mostly right (`total_sales`, `order_count`, `h1_2024_sales`, `median_price` 3 of 3; `sales_by_region`, `north_sales` 2 of 3). Seven questions scored 0 of 3: the top-k and per-category average questions (`top_categories_avg`, `top_products`, `avg_by_category`, `quantity_by_category`), `monthly_trend`, `average_age` and `returned_orders`. The benchmark does not say why each one failed.
-* **Raw `median_price` was correct 3 of 3**, the only question the model got right on the messy table.
+* **Cleaning is what makes the answers possible.** With the current prompt the same model answers 17% of questions correctly on the raw table and 83% after cleaning. On the raw table most queries fail outright because the amount column is still text, so it cannot be summed.
+* **v2 is not a held-out result.** I rewrote the prompt after reading the failures of v1 on these same 14 questions, so 83% is optimistic for questions the prompt was never tuned on. The worked examples in the prompt use an unrelated HR table, and the failures informed the rules (what `column` and `group_by` mean, when to use count, distinct count or a sum), but the questions are the same ones.
+* **What v1 got wrong** was mostly format confusion: putting the category in `column` instead of the number to add up, leaving `column` empty on a trend, ranking rows instead of groups, and using `value_counts` where a sum was needed.
+* **Remaining errors.** `top_categories_avg` and `north_sales` scored 0 of 3 on the cleaned table and `average_age` 2 of 3; I have not diagnosed these. The 17% wrong-answer rate means the query ran but returned different numbers, and the number guard cannot catch that: it checks that the written answer matches the result table, not that the query was the right one.
+* **Small sample.** 42 questions per row, one run each, one 7B model; a language model does not answer identically on every run.
 
 For comparison, a scripted planner that always asks the right question scores 14% on the raw table and 100% on the cleaned one (14 questions × 5 tables = 70 per row). That run isolates what the cleaning step is worth; it is not a measurement of any language model.
 
@@ -172,7 +173,7 @@ Time grows linearly with rows.
 
 ## Limitations
 
-* Language-model quality is measured for one 7B model on one run (40% correct after cleaning, see Results). Grouped and top-k questions are where it fails most; a larger model or more prompt work would likely help, but that is not measured here.
+* Language-model quality is measured for one 7B model on a fixed set of 14 questions, and the prompt was tuned on that same set (83% correct after cleaning, see Results). Treat it as an upper-ish estimate; a held-out question set and other models are not measured.
 * Checks work on a single table in memory; there is no streaming or database support.
 * European decimals (`1,5`) and files that mix several date formats in one column are only partly understood.
 * "Unusual rows" assumes the data forms one cloud; clustered or heavy-tailed data may produce none or too few results.
