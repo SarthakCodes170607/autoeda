@@ -42,3 +42,36 @@ def test_manual_query_runs_without_a_model(app):
     app.run()
 
     assert not app.exception
+
+
+@pytest.fixture
+def without_agent_extras(monkeypatch):
+    """Pretend langgraph and ollama are not installed, as on the free hosting tier."""
+    import sys
+
+    for name in ("langgraph", "ollama"):
+        monkeypatch.setitem(sys.modules, name, None)
+    for name in [m for m in sys.modules if m.startswith("autoeda.agent")]:
+        monkeypatch.delitem(sys.modules, name)
+    monkeypatch.delitem(sys.modules, "autoeda", raising=False)
+
+
+def test_app_runs_without_the_agent_extras(without_agent_extras):
+    test = AppTest.from_file(APP, default_timeout=60)
+    test.run()
+
+    assert not test.exception
+    next(b for b in test.button if b.label == "Run query").click()
+    test.run()
+    assert not test.exception
+
+
+def test_asking_without_the_agent_extras_explains_what_is_missing(without_agent_extras):
+    test = AppTest.from_file(APP, default_timeout=60)
+    test.run()
+    test.text_input[0].set_value("total sales?")
+    next(b for b in test.button if b.label == "Ask").click()
+    test.run()
+
+    assert not test.exception
+    assert any("agent extras" in error.value for error in test.error)

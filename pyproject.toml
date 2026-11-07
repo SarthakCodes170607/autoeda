@@ -29,7 +29,7 @@ agent = [
     "ollama>=0.3",
 ]
 app = [
-    "streamlit>=1.35",
+    "streamlit>=1.50",
 ]
 dev = [
     "pytest>=8",

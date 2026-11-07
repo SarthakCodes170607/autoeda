@@ -48,7 +48,7 @@ def current_table() -> tuple[pd.DataFrame | None, str, bool]:
     with st.sidebar:
         st.header("Data")
         upload = st.file_uploader("Upload a CSV file", type=["csv", "tsv", "txt"])
-        use_sample = st.button("Use the sample messy file", use_container_width=True)
+        use_sample = st.button("Use the sample messy file", width="stretch")
         st.caption(f"Files are read up to {MAX_ROWS:,} rows. Nothing is stored.")
 
     if upload is not None:
@@ -102,11 +102,11 @@ def profile_tab(df: pd.DataFrame, name: str, truncated: bool) -> None:
     missing = charts.missing_values(report)
     if missing is not None:
         left.subheader("Missing values")
-        left.plotly_chart(missing, use_container_width=True)
+        left.plotly_chart(missing, width="stretch")
     correlation = charts.correlation(report.correlation)
     if correlation is not None:
         right.subheader("Correlation")
-        right.plotly_chart(correlation, use_container_width=True)
+        right.plotly_chart(correlation, width="stretch")
 
     st.subheader("Columns")
     chosen = st.selectbox("Look at a column", [item.name for item in report.columns])
@@ -114,7 +114,7 @@ def profile_tab(df: pd.DataFrame, name: str, truncated: bool) -> None:
     st.caption(f"{column.kind.value}: {column.reason}")
     figure = charts.column_chart(column)
     if figure is not None:
-        st.plotly_chart(figure, use_container_width=True)
+        st.plotly_chart(figure, width="stretch")
     if column.stats:
         st.json(column.stats, expanded=False)
 
@@ -177,11 +177,11 @@ def clean_tab(df: pd.DataFrame) -> None:
         for item in result.skipped
     ]
     if rows:
-        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
     st.subheader("The same steps as pandas code")
     st.code(result.code, language="python")
     st.subheader("Cleaned data (first rows)")
-    st.dataframe(result.df.head(50), use_container_width=True)
+    st.dataframe(result.df.head(50), width="stretch")
 
     left, right = st.columns(2)
     left.download_button(
@@ -207,7 +207,7 @@ def compare_tab(df: pd.DataFrame) -> None:
     st.text(drift.summary_text())
     figure = charts.drift_scores(drift)
     if figure is not None:
-        st.plotly_chart(figure, use_container_width=True)
+        st.plotly_chart(figure, width="stretch")
     rows = [
         {
             "column": item.column,
@@ -216,7 +216,37 @@ def compare_tab(df: pd.DataFrame) -> None:
         }
         for item in drift.columns
     ]
-    st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
+
+
+def ask_with_model(df: pd.DataFrame, question: str, model: str, host: str) -> None:
+    """Run the agent. The agent extras are optional, so a missing install is explained."""
+    try:
+        from autoeda.agent import OllamaClient, ask
+        from autoeda.agent.llm import LLMError
+    except ImportError:
+        st.error(
+            'This part needs the agent extras: pip install "autoeda[agent]". '
+            "Use the query builder below instead."
+        )
+        return
+
+    try:
+        client = OllamaClient(model=model, host=host)
+    except LLMError as error:
+        st.error(str(error))
+        return
+
+    with st.spinner("Thinking..."):
+        outcome = ask(df, question, client)
+    st.write(outcome.answer)
+    if outcome.result is not None:
+        st.dataframe(outcome.result.table, width="stretch", hide_index=True)
+    if outcome.figure is not None:
+        st.plotly_chart(outcome.figure, width="stretch")
+    with st.expander("What the agent did"):
+        for step in outcome.trace:
+            st.write(f"**{step['step']}**: {step['detail']}")
 
 
 def ask_tab(df: pd.DataFrame) -> None:
@@ -236,18 +266,7 @@ def ask_tab(df: pd.DataFrame) -> None:
     model = left.text_input("Ollama model", value="qwen2.5:7b-instruct")
     host = right.text_input("Ollama address", value="http://localhost:11434")
     if st.button("Ask") and question:
-        from autoeda.agent import OllamaClient, ask
-
-        with st.spinner("Thinking..."):
-            outcome = ask(df, question, OllamaClient(model=model, host=host))
-        st.write(outcome.answer)
-        if outcome.result is not None:
-            st.dataframe(outcome.result.table, use_container_width=True, hide_index=True)
-        if outcome.figure is not None:
-            st.plotly_chart(outcome.figure, use_container_width=True)
-        with st.expander("What the agent did"):
-            for step in outcome.trace:
-                st.write(f"**{step['step']}**: {step['detail']}")
+        ask_with_model(df, question, model, host)
 
     st.divider()
     st.subheader("Or build a query yourself (no model needed)")
@@ -275,10 +294,10 @@ def ask_tab(df: pd.DataFrame) -> None:
             st.error(str(error))
         else:
             st.caption(f"{output.title}, from {output.rows_used:,} rows")
-            st.dataframe(output.table, use_container_width=True, hide_index=True)
+            st.dataframe(output.table, width="stretch", hide_index=True)
             figure = result_figure(output)
             if figure is not None:
-                st.plotly_chart(figure, use_container_width=True)
+                st.plotly_chart(figure, width="stretch")
     if not numeric:
         st.caption("This table has no numeric columns, so only counts are available.")
 
